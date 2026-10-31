@@ -1,6 +1,6 @@
 #include "display.h"
 
-namespace acid {
+namespace acidxy {
 using opxy::i32;
 using opxy::u32;
 using opxy::draw::unit;
@@ -175,4 +175,6 @@ inline void display(DisplayState &state, const opxy::draw::Input &input, Frame &
             hide(frame, i);
     }
 }
-} // namespace acid
+} // namespace acidxy
+
+
