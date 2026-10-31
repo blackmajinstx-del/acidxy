@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-using namespace acid;
+using namespace acidxy;
 static void require(bool ok, const char *message) {
     if (!ok) {
         std::fprintf(stderr, "FAIL: %s\n", message);
@@ -157,3 +157,4 @@ int main(int argc, char **argv) {
     std::puts("PASS acid: tuning, all controls, 256 owners, isolation, retrigger, reuse, extremes, "
               "moving pitch/controls, headroom, 10s hold");
 }
+

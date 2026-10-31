@@ -2,7 +2,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-using namespace acid;
+using namespace acidxy;
 static void require(bool ok, const char *why) {
     if (!ok) {
         std::fprintf(stderr, "FAIL: %s\n", why);
@@ -91,3 +91,4 @@ int main() {
     std::puts("PASS acid level: original gain, fixed latency, anticipated peaks, clean steady "
               "waveform, full-range stress, hold/release, reuse");
 }
+

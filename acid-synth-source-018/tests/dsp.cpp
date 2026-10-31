@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-using namespace acid;
+using namespace acidxy;
 static void require(bool ok, const char *why) {
     if (!ok) {
         std::fprintf(stderr, "FAIL: %s\n", why);
@@ -173,3 +173,4 @@ int main() {
         "PASS acid DSP: analytic oscillator, tune, decay, filter, saturation, independent "
         "FIR, bit-exact polyphase and histories, impulse tails, resonant fundamental headroom");
 }
+

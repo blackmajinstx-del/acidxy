@@ -11,7 +11,7 @@ def documents():
     for name,filename in NAMES.items():
         patch=definition['presets'][name]
         result[filename]={
-            'version':4,'platform':'OP-XY','type':'acid','regions':[],
+            'version':4,'platform':'OP-XY','type':'acidxy','regions':[],
             'engine':{
                 'bendrange':8191,'detune':0,'highpass':0,
                 'modulation':{name:{'amount':16384,'target':0} for name in ['aftertouch','modwheel','pitchbend','velocity']},
@@ -29,3 +29,4 @@ def documents():
 if __name__=='__main__':
     for name,document in documents().items():
         (ROOT/'presets'/(name+'.json')).write_text(json.dumps(document,indent=2)+'\n')
+

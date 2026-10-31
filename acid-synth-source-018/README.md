@@ -2,7 +2,7 @@
 
 ACID is an acid bass synth for OP-XY OS 1.2.1, built against the public Open-XY
 SDK 1.6. This release promotes the hardware-auditioned FAST 014 sound to the
-main `acid` engine. All five supplied presets, including the init preset, use
+main `acidxy` engine. All five supplied presets, including the init preset, use
 the OP-XY's native mono playback mode.
 
 ## Controls
@@ -184,7 +184,8 @@ as source and do not commit `os.ldr`.
 For official builder inclusion, follow the current
 [Open-XY catalog submission guide](https://github.com/etcetc000/open-xy/blob/main/docs/catalog.md).
 The engine source remains in your own repository. A catalog-only pull request
-reserves `acid`, then pins an approved tag/commit and the hardware-generated
+reserves `acidxy`, then pins an approved tag/commit and the hardware-generated
 CPU record. Ordinary submissions target `main`; work requiring unreleased SDK
 changes targets `staging`. Check that the ID is still available before filing.
 The host estimates in this README cannot replace that hardware record.
+

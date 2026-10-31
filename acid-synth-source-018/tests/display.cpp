@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-using namespace acid;
+using namespace acidxy;
 using namespace opxy::draw;
 static void require(bool ok, const char *why) {
     if (!ok) {
@@ -10,14 +10,14 @@ static void require(bool ok, const char *why) {
         std::exit(1);
     }
 }
-static void draw(DisplayState &s, Input &in, acid::Frame &f) {
+static void draw(DisplayState &s, Input &in, acidxy::Frame &f) {
     std::memset(&f, 0, sizeof(f));
     display(s, in, f);
 }
 int main() {
     DisplayState s = {};
     Input in = {};
-    acid::Frame f = {};
+    acidxy::Frame f = {};
     display_reset(s);
     in.elapsed = 17;
     in.track = 1;
@@ -46,7 +46,7 @@ int main() {
     in.note_serial = 1;
     draw(s, in, f);
     require(s.phase > 0, "held notes animate wave");
-    require(acid::Frame::path_count == 0 && f.nodes[0].x == hidden_x * unit &&
+    require(acidxy::Frame::path_count == 0 && f.nodes[0].x == hidden_x * unit &&
             f.nodes[1].x == hidden_x * unit, "visual waveform removed");
     require(f.nodes[18].paint == keep && f.nodes[21].paint == keep,
             "sprite keeps its authored white body and black underlay");
@@ -94,12 +94,12 @@ int main() {
             "track change resets event history and header");
     in.held_notes = 0;
     draw(s, in, f);
-    acid::Frame idle = f;
+    acidxy::Frame idle = f;
     for (unsigned j = 0; j < 20; ++j)
         draw(s, in, f);
     require(!std::memcmp(&idle, &f, sizeof(f)), "idle scene remains still");
     for(unsigned configuration=0;configuration<2;++configuration){
-        DisplayState routing={}; Input controls={}; acid::Frame scene={};
+        DisplayState routing={}; Input controls={}; acidxy::Frame scene={};
         display_reset(routing);controls.track=1;controls.elapsed=1;controls.held_notes=1;
         controls.slots[2]=configuration ? 0 : 2147483647;
         controls.slots[3]=configuration ? 2147483647 : 0;
@@ -146,3 +146,4 @@ int main() {
     std::puts("PASS acid drawing: header pages, tune, notes, strobes, reduced motion, track "
               "resets, idle, 80000 frames");
 }
+
