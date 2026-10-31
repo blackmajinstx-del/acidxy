@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "sdk": "1.6",
+  "kind": "synth",
+  "description": "Mono-preset acid bass: saw/square, resonant SVF, filter envelope, 1x drive, oscillator overdrive and distortion. Animated rave display.",
+  "presets": "presets"
+}
