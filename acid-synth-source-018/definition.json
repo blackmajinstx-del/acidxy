@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "id": "acid",
-  "name": "ACID",
+  "id": "acidxy",
+  "name": "ACIDXY",
   "parameters": [
     {
       "id": "decay",
