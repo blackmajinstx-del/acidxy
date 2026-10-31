@@ -1,6 +1,6 @@
 #pragma once
 #include <opxy/audio.hpp>
-namespace acid {
+namespace acidxy {
 struct Voice {
     opxy::u32 phase;
     opxy::u32 phase_fraction;  // low 29 bits of the tuned phase step
@@ -20,4 +20,5 @@ struct Voice {
 };
 struct Shared {};
 static_assert(sizeof(Voice) == 408, "Update definition.json with Voice size");
-} // namespace acid
+} // namespace acidxy
+

@@ -2,7 +2,7 @@
 #include "core.h"
 #include "tables.h"
 #include <opxy/q31.hpp>
-namespace acid {
+namespace acidxy {
 using opxy::i32;
 using opxy::u32;
 const i32 one = 2147483647;
@@ -619,4 +619,5 @@ inline void render(Voice &v, Shared &shared, u32 owner, opxy::Output output,
     render_core(v, shared, owner, output, params, pitch);
     level_output(v, output);
 }
-} // namespace acid
+} // namespace acidxy
+

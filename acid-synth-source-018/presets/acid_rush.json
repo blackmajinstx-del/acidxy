@@ -1,7 +1,7 @@
 {
   "version": 4,
   "platform": "OP-XY",
-  "type": "acid",
+  "type": "acidxy",
   "regions": [],
   "engine": {
     "bendrange": 8191,
@@ -89,3 +89,4 @@
   },
   "octave": 0
 }
+

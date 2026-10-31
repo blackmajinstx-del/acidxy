@@ -1,7 +1,7 @@
 #pragma once
 #include <opxy/page_header.hpp>
 
-namespace acid {
+namespace acidxy {
 // No mutable wave paths; the retired slots retain stable artwork IDs.
 using Frame = opxy::draw::Frame<0, 0, 31, 16, 16>;
 struct DisplayState {
@@ -15,4 +15,5 @@ struct DisplayState {
 static_assert(sizeof(opxy::draw::PageHeader) == 20, "Unexpected Open-XY PageHeader layout");
 static_assert(sizeof(opxy::draw::NoteTracker) == 16, "Unexpected Open-XY NoteTracker layout");
 static_assert(sizeof(DisplayState) == 52, "Keep resources.display.stateBytes in sync");
-} // namespace acid
+} // namespace acidxy
+
