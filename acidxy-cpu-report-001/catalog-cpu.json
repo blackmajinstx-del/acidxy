@@ -1,0 +1,16 @@
+{
+  "cpu": {
+    "benchmark": "opxy-synth-c8-sweep-v1",
+    "commit": "da1a15908d7b38668fe06a115f486caed1ce715b",
+    "firmware_sha256": "f84e2ad0b95da048176f39c10945aa50206bbcee2baf83881e46c62a5da45fa4",
+    "runs": 3,
+    "block_percent": 7.719539,
+    "midpoint_percent": 6.076143,
+    "combined_percent": 5.618372,
+    "worst_setting": {
+      "control": 6,
+      "label": "WAV DIST",
+      "value": 1342177279
+    }
+  }
+}
