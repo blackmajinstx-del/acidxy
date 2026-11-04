@@ -1,0 +1,92 @@
+{
+  "version": 4,
+  "platform": "OP-XY",
+  "type": "acidxy",
+  "regions": [],
+  "engine": {
+    "bendrange": 8191,
+    "detune": 0,
+    "highpass": 0,
+    "modulation": {
+      "aftertouch": {
+        "amount": 16384,
+        "target": 0
+      },
+      "modwheel": {
+        "amount": 16384,
+        "target": 0
+      },
+      "pitchbend": {
+        "amount": 16384,
+        "target": 0
+      },
+      "velocity": {
+        "amount": 16384,
+        "target": 0
+      }
+    },
+    "params": [
+      13434,
+      24248,
+      25886,
+      20316,
+      11796,
+      26541,
+      7209,
+      16384
+    ],
+    "playmode": "mono",
+    "portamento.amount": 0,
+    "portamento.type": 0,
+    "transpose": 0,
+    "tuning.root": 0,
+    "tuning.scale": 0,
+    "velocity.sensitivity": 0,
+    "volume": 32767,
+    "width": 0
+  },
+  "envelope": {
+    "amp": {
+      "attack": 128,
+      "decay": 8192,
+      "sustain": 32767,
+      "release": 32767
+    },
+    "filter": {
+      "attack": 0,
+      "decay": 0,
+      "release": 0,
+      "sustain": 32767
+    }
+  },
+  "fx": {
+    "active": false,
+    "params": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      32767,
+      0,
+      0
+    ],
+    "type": "svf"
+  },
+  "lfo": {
+    "active": false,
+    "params": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "type": "value"
+  },
+  "octave": 0
+}
+

@@ -57,7 +57,7 @@ int main() {
                          std::pow(2., -2 + 4 * amount)) < 2e-6,
                 "continuous tune ratios");
         const double ideal = std::exp(-.004 * (1 - amount));
-        require(std::abs(double(normalized_table(tables::envelope_keep, q(amount))) / 2147483648. -
+        require(std::abs(double(normalized_table(tables::envelope_keep, q(amount), 128)) / 2147483648. -
                          ideal) < 1e-8,
                 "web decay mapping");
         const double k = std::pow(2., -7 + 7 * amount);
@@ -71,7 +71,7 @@ int main() {
             require(std::abs(expected - actual) < 1.6e-4, "bounded fast saturation vs analytic tanh");
         }
     }
-    require(normalized_table(tables::envelope_keep, one) == one, "infinite decay endpoint");
+    require(normalized_table(tables::envelope_keep, one, 128) == one, "infinite decay endpoint");
     Voice naive, optimized;
     Shared drive_shared;
     initialize(naive, drive_shared, 1);

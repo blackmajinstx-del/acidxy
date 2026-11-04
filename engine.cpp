@@ -32,22 +32,42 @@ inline i32 mul(i32 a, i32 b) {
     return high*i32(coefficient)+i32((low*coefficient)>>16);
 }
 inline i32 clamp(i32 x, i32 limit) { return x < -limit ? -limit : x > limit ? limit : x; }
-inline i32 interpolate(const i32 *table, u32 index, i32 fraction) {
-    // Generated adjacent table deltas fit +/- 2^22. A nine-bit fraction keeps
-    // the product in i32 without a wide Q31 multiply.
-    return table[index] + ((table[index + 1] - table[index]) * (fraction >> 22)) / 512;
+inline i32 interpolate(i32 first, i32 next, u32 fraction) {
+    const i32 delta = next - first;
+    return first + opxy::q31::multiply(delta, i32(fraction << 15));
+}
+inline i32 interpolate(const i32 *table, u32 index, u32 fraction) {
+    return interpolate(table[index], table[index + 1], fraction);
+}
+inline i32 exp2_value(u32 index) {
+    const u32 at = index * 3u;
+    const u32 value = tables::exp2_filter[at] |
+                      (u32(tables::exp2_filter[at + 1]) << 8) |
+                      (u32(tables::exp2_filter[at + 2]) << 16);
+    return i32(value << 7);
+}
+inline i32 lookup_exp2(u32 position) {
+    const u32 index = position >> 16;
+    return index >= 1440u ? exp2_value(1440u)
+                          : interpolate(exp2_value(index), exp2_value(index + 1), position & 65535u);
 }
 // position in Q16, endpoints included; last is the final table index.
 inline i32 lookup(const i32 *table, u32 position, u32 last) {
     const u32 index = position >> 16;
-    return index >= last ? table[last] : interpolate(table, index, i32((position & 65535u) << 15));
+    return index >= last ? table[last] : interpolate(table, index, position & 65535u);
 }
-inline i32 normalized_table(const i32 *table, i32 amount) {
-    return amount == one ? table[1024] : lookup(table, u32(amount) >> 5, 1024);
+inline i32 normalized_table(const i32 *table, i32 amount, u32 last) {
+    const u32 value = u32(amount);
+    const u32 position = (value >> 15) * last + (((value & 32767u) * last) >> 15);
+    return amount == one ? table[last] : lookup(table, position, last);
 }
 inline i32 tune_ratio(i32 amount) {
-    return amount == one ? tables::exp2_tune[16384]
-                         : lookup(tables::exp2_tune, u32(amount) >> 1, 16384); // Q3.29
+    const u32 a = u32(amount);
+    const u32 position = a <= 1610612735u
+        ? (128u << 16) + (a / 128u) * 5u + ((a % 128u) * 5u) / 128u
+        : (1088u << 16) + ((a - 1610612735u) / 256u) * 11u +
+          (((a - 1610612735u) % 256u) * 11u) / 256u;
+    return lookup_exp2(position); // Q3.29
 }
 // Unsigned full precision 32x32 product, split into 16-bit limbs; no 64-bit
 // runtime arithmetic or compiler division helpers in contributor audio code.
@@ -158,7 +178,12 @@ inline i32 coefficient(i32 cutoff, i32 depth, i32 envelope) {
         return one;
     if (exponent < -117440512)
         exponent = -117440512;
-    return lookup(tables::exp2_filter, u32(exponent + 117440512) * 2u, 3584);
+    const u32 amount = u32(exponent + 117440512);
+    const u32 position = amount <= 50331648u ? amount / 6u
+        : amount <= 100663296u
+            ? (128u << 16) + ((amount - 50331648u) * 5u) / 4u
+            : (1088u << 16) + ((amount - 100663296u) * 11u) / 8u;
+    return lookup_exp2(position);
 }
 inline i32 section(i32 input, i32 kf, i32 kq, i32 &low, i32 &band) {
     const i32 lp = add(low, mul(band, kf));
@@ -278,7 +303,7 @@ inline i32 saturation_prepared(i32 sample, i32 amount, i32 compensation) {
     // tanh table extends to 16; beyond that its Q23 result is exactly 1.
     const u32 magnitude = x < 0 ? 0u - u32(x) : u32(x);
     const i32 curved =
-        magnitude >= 8u * audio_one ? audio_one : tables::tanh_fast[(magnitude+1024u)>>11];
+        magnitude >= 8u * audio_one ? audio_one : lookup(tables::tanh_fast, magnitude >> 2, 256);
     const i32 result = mul(curved, compensation);
     return x < 0 ? -result : result;
 }
@@ -310,7 +335,7 @@ inline void drive_block(Voice &v,opxy::Output output,i32 amount) {
     v.down[4]=phases[3][62];v.down[5]=phases[2][62];v.down[6]=phases[1][62];
 }
 inline i32 saturation(i32 sample, i32 amount) {
-    return saturation_prepared(sample, amount, normalized_table(tables::sat_compensation, amount));
+    return saturation_prepared(sample, amount, normalized_table(tables::sat_compensation, amount, 128));
 }
 // TD-3-MO-style oscillator overdrive before the filter. Unlike the old
 // post-filter saturation this deliberately changes how resonance responds.
@@ -328,7 +353,7 @@ inline i32 overdrive(i32 sample, i32 amount) {
             x = add(x, a);
     const u32 magnitude = x < 0 ? 0u - u32(x) : u32(x);
     const i32 curved =
-        magnitude >= 8u * audio_one ? audio_one : tables::tanh_fast[(magnitude+1024u)>>11];
+        magnitude >= 8u * audio_one ? audio_one : lookup(tables::tanh_fast, magnitude >> 2, 256);
     return x < 0 ? -curved : curved;
 }
 inline i32 boost_prepared(i32 sample,i32 gain_q24) {
@@ -338,7 +363,7 @@ inline i32 boost_prepared(i32 sample,i32 gain_q24) {
 inline i32 overdrive_prepared(i32 sample,i32 gain_q24) {
     const i32 x=boost_prepared(sample,gain_q24);
     const u32 magnitude=x<0 ? 0u-u32(x) : u32(x);
-    const i32 curved=magnitude>=8u*audio_one ? audio_one : tables::tanh_fast[(magnitude+1024u)>>11];
+    const i32 curved=magnitude>=8u*audio_one ? audio_one : lookup(tables::tanh_fast, magnitude >> 2, 256);
     return x<0 ? -curved : curved;
 }
 inline i32 drive_clip_prepared(i32 sample,i32 gain_q24) {
@@ -389,12 +414,12 @@ inline void render_block(Voice &v, opxy::Output output, opxy::Parameters params,
     const i32 ratio = tune_ratio(v.controls[0]);
     const PitchStep prepared_pitch = prepare_pitch(pitch[0], ratio);
     const BlepReciprocal prepared_blep = prepare_blep(prepared_pitch.whole);
-    const i32 prepared_keep = normalized_table(tables::envelope_keep, v.controls[4]);
+    const i32 prepared_keep = normalized_table(tables::envelope_keep, v.controls[4], 128);
     const i32 prepared_kq = one - mul(v.controls[2], 1932735282);
     const i32 prepared_wave = wave_mix(v.controls[6]);
     const i32 prepared_distortion = wave_distortion(v.controls[6]);
     const i32 prepared_compensation = Stable && prepared_distortion
-        ? normalized_table(tables::sat_compensation, prepared_distortion) : one;
+        ? normalized_table(tables::sat_compensation, prepared_distortion, 128) : one;
     const i32 mix_target = params[7] > 0 ? one : 0;
     const i32 prepared_overdrive_gain=(v.controls[5]>>7)*15+16777216;
     const i32 prepared_drive_gain=(v.controls[7]>>7)*8+16777216;
@@ -438,7 +463,7 @@ inline void render_block(Voice &v, opxy::Output output, opxy::Parameters params,
         v.phase += dt;
         if (!Stable && v.envelope && c[4] != one)
             v.envelope = mul(v.envelope, Stable ? prepared_keep
-                                                : normalized_table(tables::envelope_keep, c[4]));
+                                                : normalized_table(tables::envelope_keep, c[4], 128));
         const i32 kf = Stable ? filter_coefficients[i] : coefficient(c[1], c[3], v.envelope);
         const i32 kq = Stable ? prepared_kq : one - mul(c[2], 1932735282); // 1 - .9*reso
         // This is two time updates of the SAME pair of SVFs with the SAME
@@ -471,7 +496,7 @@ inline void render_block(Voice &v, opxy::Output output, opxy::Parameters params,
         const i32 distortion = Stable ? prepared_distortion : wave_distortion(c[6]);
         if (distortion)
             value = saturation_prepared(value, distortion, Stable ? prepared_compensation
-                : normalized_table(tables::sat_compensation, distortion));
+                : normalized_table(tables::sat_compensation, distortion, 128));
         output[i] = value; // raw Q9.23; output conditioning owns format conversion
     }
 }
@@ -485,7 +510,7 @@ inline void render_stable_constant(Voice &v,opxy::Output output,const i32 *c,opx
         v.phase+=dt;
     }
     if(c[5]) for(unsigned i=0;i<64;++i) output[i]=overdrive(output[i],c[5]);
-    const i32 keep=normalized_table(tables::envelope_keep,c[4]);
+    const i32 keep=normalized_table(tables::envelope_keep,c[4],128);
     const i32 kq=one-mul(c[2],1932735282);
     const i32 base_kf=coefficient(c[1],0,0);
     for(unsigned i=0;i<64;++i){
@@ -500,7 +525,7 @@ inline void render_stable_constant(Voice &v,opxy::Output output,const i32 *c,opx
     if(c[7]) drive_block(v,output,c[7]);
     const i32 distortion=wave_distortion(c[6]);
     if(distortion){
-        const i32 compensation=normalized_table(tables::sat_compensation,distortion);
+        const i32 compensation=normalized_table(tables::sat_compensation,distortion,128);
         for(unsigned i=0;i<64;++i) output[i]=saturation_prepared(output[i],distortion,compensation);
     }
 }
